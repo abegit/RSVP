@@ -3,9 +3,9 @@ angular.module('wpIonic.controllers', [])
 .controller('AppCtrl', function($scope, $ionicModal, $timeout, $sce, DataLoader, $rootScope ) {
   
   // Enter your site url here. You must have the Reactor Core plugin activated on this site
-  $rootScope.url = 'http://unscene.us';
+  $rootScope.url = 'https://bonoboville.com';
   
-  $rootScope.callback = 'type=product&_jsonp=JSON_CALLBACK';
+  $rootScope.callback = 'type=event&filter[meta_key]=_event_start_date&filter[order_by]=meta_value&filter[order]=ASC&_jsonp=JSON_CALLBACK';
 
   // Create the login modal that we will use later
   $ionicModal.fromTemplateUrl('templates/login.html', {
@@ -91,6 +91,9 @@ angular.module('wpIonic.controllers', [])
       $scope.post = data;
       // Don't strip post html
       $scope.content = $sce.trustAsHtml(data.content);
+      $scope.itemDetail = function(link){
+        $scope.detailFrame = 'https://bonoboville.com/checkout?add-to-cart=' + link;
+      };
       $ionicLoading.hide();
     }).
     error(function(data, status, headers, config) {
@@ -101,13 +104,13 @@ angular.module('wpIonic.controllers', [])
 
 .controller('PostsCtrl', function( $scope, $http, DataLoader, $timeout, $ionicSlideBoxDelegate, $rootScope ) {
 
-    var postsApi = $rootScope.url + '/wp-json/posts?type=product&' + $rootScope.callback;
+    var postsApi = $rootScope.url + '/wp-json/posts?' + $rootScope.callback;
 
     $scope.loadPosts = function() {
 
       DataLoader.all( postsApi ).success(function(data, status, headers, config) {
         $scope.posts = data;
-        //console.dir( data );
+        console.dir( data );
       }).
       error(function(data, status, headers, config) {
         console.log('error');
@@ -116,6 +119,7 @@ angular.module('wpIonic.controllers', [])
     }
 
     // Load posts on page load
+
     $scope.loadPosts();
 
     paged = 2;
@@ -134,7 +138,7 @@ angular.module('wpIonic.controllers', [])
 
         var apiurl = $rootScope.url + '/wp-json/posts';
 
-        DataLoader.all( apiurl + '?type=product&page=' + pg + '&' + $rootScope.callback ).success(function(data, status, headers, config) {
+        DataLoader.all( apiurl + '?type=event&filter[meta_key]=_event_start_date&filter[order_by]=meta_value&filter[order]=ASC&page=' + pg + '&' + $rootScope.callback ).success(function(data, status, headers, config) {
 
           angular.forEach( data, function( value, key ) {
             $scope.posts.push(value);
@@ -174,7 +178,68 @@ angular.module('wpIonic.controllers', [])
       }, 1000);
         
     };
-    
+})
+
+.controller('EventsCtrl', function( $scope, $http, DataLoader, $timeout, $ionicSlideBoxDelegate, $rootScope ) {
+    var eventsApi = $rootScope.url + '/wp-json/posts?' + $rootScope.callback;
+    $scope.loadPosts = function() {
+      DataLoader.all( eventsApi ).success(function(data, status, headers, config) {
+        $scope.posts = data;
+        console.log('Using EventsCtrl');
+        console.dir( data );
+
+      }).
+      error(function(data, status, headers, config) {
+        console.log('error');
+      });
+    }
+
+    // Load posts on page load
+    $scope.loadPosts();
+
+    paged = 2;
+    $scope.moreItems = true;
+
+    // Load more (infinite scroll)
+    $scope.loadMore = function() {
+      if( !$scope.moreItems ) {
+        return;
+      }
+      var pg = paged++;
+      $timeout(function() {
+        var apiurl = $rootScope.url + '/wp-json/posts';
+        DataLoader.all( apiurl + '?type=event&filter[meta_key]=_event_start_date&filter[order_by]=meta_value&filter[order]=ASC&page=' + pg + '&' + $rootScope.callback ).success(function(data, status, headers, config) {
+          angular.forEach( data, function( value, key ) {
+            $scope.posts.push(value);
+          });
+          if( data.length <= 0 ) {
+            $scope.moreItems = false;
+          }
+        }).
+        error(function(data, status, headers, config) {
+          $scope.moreItems = false;
+          console.log('error');
+        });
+
+        $scope.$broadcast('scroll.infiniteScrollComplete');
+        $scope.$broadcast('scroll.resize');
+
+      }, 1000);
+
+    }
+
+    $scope.moreDataExists = function() {
+      return $scope.moreItems;
+    }
+    // Pull to refresh
+    $scope.doRefresh = function() {
+      console.log('Refreshing!');
+      $timeout( function() {
+        $scope.loadPosts();
+        //Stop the ion-refresher from spinning
+        $scope.$broadcast('scroll.refreshComplete');
+      }, 1000);
+    };
 })
 
 .controller('IntroCtrl', function($scope, $state, $ionicSlideBoxDelegate, $ionicViewService) {
@@ -185,7 +250,7 @@ angular.module('wpIonic.controllers', [])
  
   // Called to navigate to the main app
   $scope.startApp = function() {
-    $state.go('app.posts');
+    $state.go('app.events');
   };
   $scope.next = function() {
     $ionicSlideBoxDelegate.next();
@@ -201,8 +266,14 @@ angular.module('wpIonic.controllers', [])
 
 })
 
-.controller('TabsCtrl', function($scope) {
+.controller('TabsCtrl', function($scope, $state, $ionicViewService) {
 
-  // Tabs stuff here
-
+  $ionicViewService.nextViewOptions({
+    disableBack: true
+  });
+ 
+  // Called to navigate to the main app
+  $scope.goToEvents = function() {
+    $state.go('app.events');
+  };
 });

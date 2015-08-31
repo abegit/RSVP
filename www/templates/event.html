@@ -5,6 +5,9 @@
   <ion-content class="padding">
   <img ng-if="post.featured_image.attachment_meta.sizes.large.url" src="{{post.featured_image.attachment_meta.sizes.large.url}}" class="alignleft" width="100%"/>
   	<div ng-bind-html="content"></div>
-  	<a href="/?add_to_cart={{post.getddat.somekey}}">Add to Cart</a>
+  	
+	<a href="https://bonoboville.com/checkout/?add-to-cart={{post.ID}}" class="button button-block button-positive" target="_new">Add to Cart</a>
+  	<iframe width="500" height="400" ng-src="{{detailFrame}}"></iframe>
+
   </ion-content>
 </ion-view>

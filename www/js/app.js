@@ -42,21 +42,21 @@ angular.module('wpIonic', ['ionic', 'wpIonic.controllers', 'wpIonic.services', '
   })
 
   // this is the first sub view, notice menuContent under 'views', which is loaded through menu.html
-  .state('app.posts', {
-    url: "/posts",
+  .state('app.events', {
+    url: "/events",
     views: {
       'menuContent': {
-        templateUrl: "templates/posts.html",
-        controller: 'PostsCtrl'
+        templateUrl: "templates/events.html",
+        controller: 'EventsCtrl'
       }
     }
   })
 
-  .state('app.post', {
-    url: "/posts/:postId",
+  .state('app.event', {
+    url: "/events/:postId",
     views: {
       'menuContent': {
-        templateUrl: "templates/post.html",
+        templateUrl: "templates/event.html",
         controller: 'PostCtrl'
       }
     }
@@ -70,12 +70,20 @@ angular.module('wpIonic', ['ionic', 'wpIonic.controllers', 'wpIonic.services', '
       }
     }
   })
-
-  .state('app.tabs', {
-    url: "/tabs",
+  .state('app.live', {
+    url: "/live",
     views: {
       'menuContent': {
-        templateUrl: "templates/tabs.html",
+        templateUrl: "templates/live.html"
+      }
+    }
+  })
+
+  .state('app.dashboard', {
+    url: "/dashboard",
+    views: {
+      'menuContent': {
+        templateUrl: "templates/dashboard.html",
         controller: 'TabsCtrl'
       }
     }
@@ -90,5 +98,5 @@ angular.module('wpIonic', ['ionic', 'wpIonic.controllers', 'wpIonic.services', '
       }
     });
   // if none of the above states are matched, use this as the fallback
-  $urlRouterProvider.otherwise('/app/intro');
+  $urlRouterProvider.otherwise('/app/dashboard');
 });
